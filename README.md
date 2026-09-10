@@ -40,7 +40,7 @@ node bin/weekly.mjs <源> --end 2026-08-30 --goals goals.qiyun.json --feishu <fo
 
 溯源：两命令的格式分别对齐上游 `Happy-logos/okr-doing-agent` v1.0.0 的 `templates/logseq/templates/daily-routine.md`（今天需要做 TODO / 今日行动记录 / 明天要做）与 `templates/logseq/templates/week-review.md`（周复盘 RREUA）。**V5 粘贴动作=人工确认门，本仓绝不写 Logseq 图谱；V6 只灌 Evidence 事实层，Result/Reason/Update/Action 留白给人**——记录与裁决分离，上游模板与本项目戒律同构。
 
-输入两种：微信「聊天记录」导出 txt（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），或按天 JSON 目录（气运+1 全量语料 `v2/raw/YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`，适配层见 `src/parse-days.mjs`）。
+输入两种：微信「聊天记录」导出 txt（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），或按天 JSON 目录（一个 19 个月课程社群的全量导出：每天一个 `YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`，适配层见 `src/parse-days.mjs`）。
 
 ## 设计决定（都踩过真实数据的坑）
 
@@ -68,7 +68,7 @@ node bin/weekly.mjs <源> --end 2026-08-30 --goals goals.qiyun.json --feishu <fo
 输入二选一（`replay`/`daily`/`chronicle`/`clean` 全部自动识别）：
 
 - **txt 转储**：微信「聊天记录」导出格式（头部 + `[时间] 说话人: 正文` + `↳ 回复` + 系统行）
-- **按天 JSON 目录**：`YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`（气运+1 全量 534 天即此格式，适配层 `src/parse-days.mjs`）
+- **按天 JSON 目录**：`YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`（一个 19 个月课程社群的全量导出即此格式：534 天、59,006 条消息，适配层 `src/parse-days.mjs`）
 
 `bin/clean.mjs` 把任意一种洗成结构化 JSONL 正本：引用拆成 `reply_to`/`reply_excerpt`、系统行归类、`[图片]/[语音]/[合并聊天记录]` 等标记剥空、同秒同人同文去重、空正文文本行丢弃（计数留痕）：
 

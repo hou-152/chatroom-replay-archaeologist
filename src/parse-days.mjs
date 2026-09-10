@@ -1,4 +1,4 @@
-// 按天 JSON 适配层：气运+1 全量语料（v2/raw/YYYY-MM-DD.json，534 天 59,006 条）→ 与 parseDump 同形的消息模型。
+// 按天 JSON 适配层：某课程社群全量语料的按天导出（YYYY-MM-DD.json，534 天 59,006 条）→ 与 parseDump 同形的消息模型。
 // 实测 schema：{chat, chat_type, count, is_group, messages:[{content, local_id, sender, time, timestamp, type}]}
 //
 // 映射规则：
