@@ -71,6 +71,9 @@ test("编年史聚合：手算核验总数、月度、KR 未对齐数", () => {
   // goals.example.json 的关键词与夹具信号零命中 → 全部未对齐（公告不参与对齐）
   assert.equal(c.krRows.length, 0);
   assert.equal(c.unaligned, 3);
+  assert.deepEqual(c.unByType, { 承诺: 1, 公告: 0, 需求: 1, 风险: 1, 进展: 0 });
+  assert.equal(c.unSamples.length, 1); // 未对齐需求均匀抽样
+  assert.equal(c.unSamples[0].quote, "这个工具有人需要吗？");
   // 承诺全录与风险带：出处必须带真实 seq（V1.2 修复 #undefined）
   assert.equal(c.todos.length, 1);
   assert.equal(c.todos[0].speaker, "张三");

@@ -53,6 +53,20 @@ export function loadJsonDays(dir) {
     for (const m of j.messages) raws.push(m);
   }
   raws.sort((a, b) => (a.timestamp - b.timestamp) || ((a.local_id || 0) - (b.local_id || 0)));
-  const messages = raws.map((r, i) => adaptMessage(r, i + 1));
-  return { chat: [...chatNames].join(" / ") || path.basename(dir), messages };
+  const seen = new Set();
+  const messages = [];
+  let droppedDuplicates = 0;
+  for (let i = 0; i < raws.length; i++) {
+    const m = adaptMessage(raws[i], i + 1);
+    if (m.kind === "text") {
+      const key = `${m.date}|${m.time}|${m.speaker}|${m.body}`;
+      if (seen.has(key)) {
+        droppedDuplicates += 1;
+        continue;
+      }
+      seen.add(key);
+    }
+    messages.push(m);
+  }
+  return { chat: [...chatNames].join(" / ") || path.basename(dir), messages, droppedDuplicates };
 }

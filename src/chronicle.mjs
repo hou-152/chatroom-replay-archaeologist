@@ -47,11 +47,21 @@ export function buildChronicle(chatName, messages, goals = { objectives: [] }) {
 
   const monthList = [...months.values()].sort((a, b) => (a.ym < b.ym ? -1 : 1));
   const krStats = new Map();
+  const unByType = { ...EMPTY_TYPES };
+  const unNeeds = [];
   let unaligned = 0;
   for (const s of [...todos, ...needs, ...risks]) {
-    if (s.alignedKr) krStats.set(s.alignedKr, (krStats.get(s.alignedKr) || 0) + 1);
-    else unaligned += 1;
+    if (s.alignedKr) {
+      krStats.set(s.alignedKr, (krStats.get(s.alignedKr) || 0) + 1);
+    } else {
+      unaligned += 1;
+      unByType[s.type] += 1;
+      if (s.type === "需求") unNeeds.push(s);
+    }
   }
+  // 未对齐需求确定性抽样：均匀取最多 12 条，让报告自己解释"未对齐里都是什么"
+  const step = Math.max(1, Math.ceil(unNeeds.length / 12));
+  const unSamples = unNeeds.filter((_, i) => i % step === 0).slice(0, 12);
 
   return {
     chatName,
@@ -64,6 +74,8 @@ export function buildChronicle(chatName, messages, goals = { objectives: [] }) {
     needs,
     krRows: [...krStats.entries()].sort((a, b) => b[1] - a[1]),
     unaligned,
+    unByType,
+    unSamples,
   };
 }
 
@@ -86,7 +98,19 @@ export function renderChronicle(c) {
   }
   lines.push("", "## 目标对齐总览", "");
   lines.push(...(c.krRows.length ? c.krRows.map(([kr, n]) => `- ${kr}：${n} 条`) : ["- （ goals.json 未命中任何 KR ）"]));
-  lines.push(`- 未对齐：${c.unaligned} 条`, "", "## 承诺全录（按时间）", "");
+  lines.push(`- 未对齐：${c.unaligned} 条（需求 ${c.unByType.需求} · 承诺 ${c.unByType.承诺} · 风险 ${c.unByType.风险} · 进展 ${c.unByType.进展}）`);
+  lines.push("", "### 未对齐是什么（非目标区，不强行入账）", "");
+  lines.push(
+    "- 未对齐 ≈ 群聊里与目标无关的日常对话：接龙、助力、寒暄、感悟。它的占比就是这个群的「目标密度」，不追求归零。",
+    "- 需求词表宽（有没有/怎么/需要 是日常高频词），保证不漏、代价是噪音；真目标信号靠 goals.json 的关键词收敛。",
+    ""
+  );
+  lines.push(
+    ...(c.unSamples.length
+      ? ["未对齐需求抽样：", ...c.unSamples.map((s) => `- ${s.date}「${s.quote}」`), ""]
+      : [])
+  );
+  lines.push("## 承诺全录（按时间）", "");
   lines.push(
     ...(c.todos.length
       ? c.todos.map((s) => {
