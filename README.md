@@ -11,8 +11,18 @@ node bin/replay.mjs <群转储.txt> --list-days              # 看转储里有�
 node bin/replay.mjs <群转储.txt> --date 2026-08-30 \
   --goals goals.example.json                              # 回放某天 → reports/*.md
 node bin/chronicle.mjs <按天JSON目录> --goals goals.example.json   # V4 全量编年史
+node bin/daily.mjs <txt转储 或 JSON目录> --goals goals.qiyun.json  # V2 群秘书日报（默认最新一天）
+#   加 --feishu <folder-token> 直接推飞书（lark-cli 通路，H1 即标题）
 node --test                                               # 四项电池
 ```
+
+V2 常驻化 = 交给 cron，例如工作日 21:00 给监管系统导出目录出日报：
+
+```cron
+0 21 * * 1-5 cd /path/to/群聊回放考古官 && node bin/daily.mjs /path/to/导出目录 --goals goals.qiyun.json
+```
+
+约定：**只吃导出物，不碰生产库**——监管系统/`wx export` 把当天的会话导出丢进目录，V2 就地出日报。
 
 输入两种：微信「聊天记录」导出 txt（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），或按天 JSON 目录（气运+1 全量语料 `v2/raw/YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`，适配层见 `src/parse-days.mjs`）。
 
@@ -36,7 +46,7 @@ node --test                                               # 四项电池
 | `select_high_value_judgements.mjs` | 关键词聚类思想 → 四类信号词表 |
 | `evaluate_xiaowangshao_challenge.mjs` | 人工门控/期望值核对思想 → 测试电池 |
 
-## 测试电池（node --test，24 项）
+## 测试电池（node --test，26 项）
 
 - **冒烟**：CLI 端到端、exit 码、报告结构、跨日隔离。
 - **稳定性**：两次运行 SHA-256 字节一致；重复行去重；乱序后单日信号多重集不变。

@@ -1,6 +1,6 @@
 {
   "name": "chatroom-replay-archaeologist",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "V1 回放考古官：微信群转储 → 单日 todo/信号回放日报（确定性内核）",
