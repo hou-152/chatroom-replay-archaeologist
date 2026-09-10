@@ -1,0 +1,5 @@
+{"chat":"测试群","messages":[
+ {"content":"方案我明天之前给你","local_id":1,"sender":"张三","time":"2026-01-01 09:00","timestamp":100,"type":"文本"},
+ {"content":"[链接] \"李四\" 拍了拍 \"张三\" 哈哈","local_id":2,"sender":"","time":"2026-01-01 09:05","timestamp":101,"type":"系统"},
+ {"content":"[引用] 同意这个判断\n  ↳ 张三: 我明天之前给你合同","local_id":3,"sender":"王五","time":"2026-01-01 10:00","timestamp":102,"type":"文本"}
+]}

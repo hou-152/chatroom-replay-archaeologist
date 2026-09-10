@@ -10,10 +10,11 @@
 node bin/replay.mjs <群转储.txt> --list-days              # 看转储里有哪些天
 node bin/replay.mjs <群转储.txt> --date 2026-08-30 \
   --goals goals.example.json                              # 回放某天 → reports/*.md
-node --test                                               # 四项电池：冒烟/稳定性/压力/对抗
+node bin/chronicle.mjs <按天JSON目录> --goals goals.example.json   # V4 全量编年史
+node --test                                               # 四项电池
 ```
 
-输入格式 = 微信「聊天记录」导出（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），实测兼容 `进阶营/DaCapo-课程记录/群-*.txt`。
+输入两种：微信「聊天记录」导出 txt（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），或按天 JSON 目录（气运+1 全量语料 `v2/raw/YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`，适配层见 `src/parse-days.mjs`）。
 
 ## 设计决定（都踩过真实数据的坑）
 
@@ -21,6 +22,8 @@ node --test                                               # 四项电池：冒�
 - **URL / XML 剥离后再挖**；**挖掘窗口 500 字**——巨型消息不得绑架日报。
 - **【开头 / @所有人 = 公告**，单独归档不进 todo——课程群的截点播报最容易冒充个人承诺。
 - **承诺必须带第一人称**（我/咱/本人，V1.1）——群体催办、无主语的截点播报不冒充个人 todo；无主语口语承诺（"明天之前搞定"）会漏，认了。
+- **中文钟点期限必须带时段前缀或之前/以内后缀**（V1.2）——"状态比昨天好一点"的"一点"曾在真实语料刷出上百条假承诺。
+- **合并聊天记录剥空不挖**（V1.2）——转发打包的标题带日期词，不是本群发言。
 - **否决词**（不了 / 不去 / 没空…）压承诺误报；宁可漏报，不可瞎报。
 - **同秒同人同文去重**；畸形行计数跳过、不进任何一天（无合法日期）。
 - **KR 对齐**走 `goals.json` 关键词命中，没配就全部未对齐——目标载体以后接 okr-doing-agent / 飞书都行。
@@ -33,7 +36,7 @@ node --test                                               # 四项电池：冒�
 | `select_high_value_judgements.mjs` | 关键词聚类思想 → 四类信号词表 |
 | `evaluate_xiaowangshao_challenge.mjs` | 人工门控/期望值核对思想 → 测试电池 |
 
-## 测试电池（node --test，18 项）
+## 测试电池（node --test，24 项）
 
 - **冒烟**：CLI 端到端、exit 码、报告结构、跨日隔离。
 - **稳定性**：两次运行 SHA-256 字节一致；重复行去重；乱序后单日信号多重集不变。

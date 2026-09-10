@@ -47,9 +47,9 @@ test("回放 09-01：承诺2强/需求1/风险1/进展1，出处与对齐正确"
   assert.equal(day.todos[0].deadline, "明天之前");
   assert.equal(day.todos[0].strength, "强");
   assert.equal(day.todos[0].alignedKr, "O1 课程交付顺利 › KR1 作业与出勤");
-  // todo 2：孙八的合同承诺（含注入文本，但承诺本身成立），期限=三点前，对齐 O2›KR1
+  // todo 2：孙八的合同承诺（含注入文本，但承诺本身成立），期限=下午三点前（V1.2 起保留时段前缀）
   assert.equal(day.todos[1].speaker, "孙八");
-  assert.equal(day.todos[1].deadline, "三点前");
+  assert.equal(day.todos[1].deadline, "下午三点前");
   assert.equal(day.todos[1].alignedKr, "O2 客户生意推进 › KR1 门店落地");
   // 否决：赵六"不了…做不了"不得出承诺；闲聊电影不得出任何信号
   assert.ok(!day.todos.some((t) => t.speaker === "赵六"));

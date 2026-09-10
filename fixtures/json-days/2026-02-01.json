@@ -1,0 +1,4 @@
+{"chat":"测试群","messages":[
+ {"content":"服务器挂了，告警了","local_id":6,"sender":"王五","time":"2026-02-01 09:00","timestamp":300,"type":"文本"},
+ {"content":"@所有人 今晚九点前交作业","local_id":7,"sender":"助教","time":"2026-02-01 09:30","timestamp":301,"type":"文本"}
+]}

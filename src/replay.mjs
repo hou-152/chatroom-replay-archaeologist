@@ -5,7 +5,7 @@ export function dayKeys(messages) {
   return [...new Set(messages.filter((m) => m.date).map((m) => m.date))].sort();
 }
 
-function alignKr(signal, goals) {
+export function alignKr(signal, goals) {
   for (const obj of (goals && goals.objectives) || []) {
     for (const kr of obj.krs || []) {
       for (const kw of kr.keywords || []) {

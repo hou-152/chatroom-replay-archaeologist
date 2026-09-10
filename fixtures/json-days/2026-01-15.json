@@ -1,0 +1,5 @@
+{"chat":"测试群","messages":[
+ {"content":"这个工具有人需要吗？","local_id":4,"sender":"李四","time":"2026-01-15 08:00","timestamp":200,"type":"文本"},
+ {"content":"[图片]","local_id":5,"sender":"张三","time":"2026-01-15 08:30","timestamp":201,"type":"图片"},
+ {"content":"[合并聊天记录] 派女孩与文件传输助手的聊天记录 (10条) - 派女孩: 高老师AI分享_2025年03月09日02时","local_id":6,"sender":"赵六","time":"2026-01-15 09:00","timestamp":202,"type":"文本"}
+]}
