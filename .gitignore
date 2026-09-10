@@ -2,3 +2,4 @@
 reports/*.md
 data/
 outbox/
+.mimosa/
