@@ -136,6 +136,28 @@ test("对抗：空天与只有头部的转储都能出合法空报告", () => {
   assert.match(report, /（无）/);
 });
 
+test("V1.1：第一人称门槛——群体催办不冒充个人承诺", () => {
+  // 手算：真实 08-30 催办句无第一人称 → 0 信号（V1.0 曾误报承诺·强）；
+  // 对照：同结构加"我"即恢复承诺；"我们"也算第一人称。
+  assert.deepEqual(
+    detectSignals("大家今天有空忙完的都可以开始了，今天上午11点一共就提交了6个人，别让所有事情都等到最后"),
+    []
+  );
+  assert.equal(
+    detectSignals("今天上午的作业我11点前提交").filter((s) => s.type === "承诺").length,
+    1
+  );
+  assert.equal(
+    detectSignals("我们明天之前把报告发群里").filter((s) => s.type === "承诺").length,
+    1
+  );
+  // 残余误报面（记录在案）："小窗我"的我是收件人，不算承诺但也不被规则惩罚
+  assert.equal(
+    detectSignals("有问题小窗我，今晚九点截止").filter((s) => s.type === "承诺").length,
+    0
+  );
+});
+
 test("对抗：stripNoise 的 XML 剥离不会把正文一起吞掉", () => {
   const signals = detectSignals('嗯嗯好的 <?xml version="1.0"?><msg><title>x</title></msg> 方案我明天之前给你');
   assert.equal(signals.filter((s) => s.type === "承诺").length, 1);

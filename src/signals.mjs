@@ -20,6 +20,11 @@ const NEED_RE = /(想要|需要|求个?|有没有人?懂|有没有|谁能|怎么
 const RISK_RE = /(出问题|出事了|翻车|挂了|崩了|宕机|故障|报错|延期|跳票|违约|投诉|退款|告警|失效|被骗|跑路|被封)/;
 const PROGRESS_RE = /(完成了|搞定了|搞好了|弄好了|上线了|发布了|交付了|报喜|通过了|拿下了|签了|成交了|到账了|恢复了|修好了|审核通过)/;
 
+// V1.1 第一人称门槛：承诺必须是我（我/咱/本人）要做的——
+// 群体催办（"大家都别等到最后"）、播报截点里全是交付词和期限，但没有"我"。
+// 代价：无主语的口语承诺（"明天之前搞定"）会漏——宁可漏报，不可瞎报。
+const FIRST_PERSON_RE = /(我|咱|本人)/;
+
 export function stripNoise(body) {
   return body
     .replace(/<\?xml[\s\S]*?(?:<\/msg>|$)/gi, " ")
@@ -56,7 +61,7 @@ export function detectSignals(rawBody) {
   const deadline = dl ? dl[0] : null;
   const volitional = VOLITION_RE.test(mined);
   const deliver = DELIVER_RE.test(mined);
-  if (!negated && ((volitional && (deadline || deliver)) || (deadline && deliver))) {
+  if (!negated && FIRST_PERSON_RE.test(mined) && ((volitional && (deadline || deliver)) || (deadline && deliver))) {
     push("承诺", { deadline, strength: deadline ? "强" : "弱" });
   }
 
