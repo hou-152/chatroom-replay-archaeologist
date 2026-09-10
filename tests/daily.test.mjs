@@ -30,3 +30,15 @@ test("V2：JSON 目录源自动识别，缺日期 exit 2", () => {
     (e) => e.status === 2
   );
 });
+
+test("V2 常驻记性：--state 首跑出报并记日期，二跑无新一天静默收工", () => {
+  const state = path.join(os.tmpdir(), `daily-state-${process.pid}.json`);
+  const out = path.join(os.tmpdir(), `daily-state-${process.pid}.md`);
+  const args = [bin, path.join(root, "fixtures", "json-days"), "--state", state, "--out", out];
+  execFileSync("node", args);
+  assert.equal(JSON.parse(fs.readFileSync(state, "utf8")).lastDate, "2026-02-01");
+  const second = execFileSync("node", args).toString();
+  assert.match(second, /没有比 2026-02-01 更新的一天，收工/);
+  fs.rmSync(state, { force: true });
+  fs.rmSync(out, { force: true });
+});

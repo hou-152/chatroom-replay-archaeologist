@@ -18,7 +18,7 @@ const flag = (n) => {
 };
 
 if (!src) {
-  console.error("用法: node bin/daily.mjs <txt转储 或 按天JSON目录> [--date D] [--goals g.json] [--out 文件] [--feishu folder-token]");
+  console.error("用法: node bin/daily.mjs <txt转储 或 按天JSON目录> [--date D] [--goals g.json] [--out 文件] [--feishu folder-token] [--state 状态文件]");
   process.exit(2);
 }
 if (!fs.existsSync(src)) {
@@ -42,6 +42,16 @@ if (!days.includes(date)) {
   process.exit(2);
 }
 
+// 常驻记性：--state 记录已处理到的最新一天；没有更新的一天就静默收工（显式 --date 不受拦）。
+const statePath = flag("state");
+if (statePath && !flag("date") && fs.existsSync(statePath)) {
+  const last = JSON.parse(fs.readFileSync(statePath, "utf8")).lastDate;
+  if (last && date <= last) {
+    console.log(`没有比 ${last} 更新的一天，收工。`);
+    process.exit(0);
+  }
+}
+
 let goals = { objectives: [] };
 if (flag("goals")) goals = JSON.parse(fs.readFileSync(flag("goals"), "utf8"));
 
@@ -51,14 +61,16 @@ const md = renderReport(chat, day).replace(/^# 群聊回放日报 · /, "# 群�
 const outPath = flag("out") || path.join("reports", `群秘书-${safeChat}-${date}.md`);
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, md);
+if (statePath) fs.writeFileSync(statePath, JSON.stringify({ lastDate: date }));
 
 console.log(`群秘书日报 ${date}｜${chat}｜信号 ${day.stats.signals}：承诺 ${day.stats.byType.承诺} · 公告 ${day.stats.byType.公告} · 需求 ${day.stats.byType.需求} · 风险 ${day.stats.byType.风险} · 进展 ${day.stats.byType.进展}`);
 console.log(`报告 → ${outPath}`);
 
 if (flag("feishu")) {
+  const larkCli = process.env.LARK_CLI || "lark-cli";
   const abs = path.resolve(outPath);
   const stdout = execFileSync(
-    "lark-cli",
+    larkCli,
     ["docs", "+create", "--api-version", "v2", "--as", "user", "--doc-format", "markdown", "--content", `@./${path.basename(abs)}`, "--parent-token", flag("feishu")],
     { cwd: path.dirname(abs), encoding: "utf8" }
   );

@@ -16,10 +16,17 @@ node bin/daily.mjs <txt转储 或 JSON目录> --goals goals.qiyun.json  # V2 群
 node --test                                               # 四项电池
 ```
 
-V2 常驻化 = 交给 cron，例如工作日 21:00 给监管系统导出目录出日报：
+V2 常驻化：**已装 launchd**（本机 `~/Library/LaunchAgents/ai.chatroom-secretary.daily.plist`，工作日 21:00 触发，`--state data/secretary-state.json` 记性——没有新的一天就静默收工，日志在 `data/secretary.log`）。数据源接监管系统时，改 plist 里的导出目录路径再 `launchctl bootstrap` 即可。卸载：
+
+```bash
+launchctl bootout gui/$(id -u)/ai.chatroom-secretary.daily
+rm ~/Library/LaunchAgents/ai.chatroom-secretary.daily.plist
+```
+
+cron 版等价配方（二选一）：
 
 ```cron
-0 21 * * 1-5 cd /path/to/群聊回放考古官 && node bin/daily.mjs /path/to/导出目录 --goals goals.qiyun.json
+0 21 * * 1-5 cd /path/to/群聊回放考古官 && node bin/daily.mjs /path/to/导出目录 --goals goals.qiyun.json --state data/secretary-state.json
 ```
 
 约定：**只吃导出物，不碰生产库**——监管系统/`wx export` 把当天的会话导出丢进目录，V2 就地出日报。
@@ -62,7 +69,7 @@ V2 常驻化 = 交给 cron，例如工作日 21:00 给监管系统导出目录�
 
 大群实测：59,006 → **51,100 条正本**（去重 896、空正文 7,010）。清洗产物 `data/` 不入库。
 
-## 测试电池（node --test，28 项）
+## 测试电池（node --test，29 项）
 
 - **冒烟**：CLI 端到端、exit 码、报告结构、跨日隔离。
 - **稳定性**：两次运行 SHA-256 字节一致；重复行去重；乱序后单日信号多重集不变。
