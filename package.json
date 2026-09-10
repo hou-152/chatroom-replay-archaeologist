@@ -1,10 +1,38 @@
 {
   "name": "chatroom-replay-archaeologist",
-  "version": "0.3.0",
-  "private": true,
+  "version": "0.5.0",
+  "description": "群聊回放考古官：微信群聊导出 → 带出处的 todo/OKR 信号（回放日报 · 全量编年史 · 每日群秘书）。确定性规则内核，测试先行。",
+  "license": "MIT",
   "type": "module",
-  "description": "V1 回放考古官：微信群转储 → 单日 todo/信号回放日报（确定性内核）",
+  "private": false,
+  "bin": {
+    "chatroom-replay-archaeologist": "bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "goals.example.json",
+    "goals.qiyun.json",
+    "docs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "wechat",
+    "chatroom",
+    "okr",
+    "todo",
+    "logseq",
+    "daily-report",
+    "archaeologist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hou-152/chatroom-replay-archaeologist.git"
+  },
   "scripts": {
-    "test": "node --test tests/"
+    "test": "node --test"
   }
 }

@@ -26,9 +26,11 @@ let goals = { objectives: [] };
 const goalsPath = flag("goals");
 if (goalsPath) goals = JSON.parse(fs.readFileSync(goalsPath, "utf8"));
 
-const { chat, messages } = loadJsonDays(dir);
+const { chat, messages, droppedDuplicates } = loadJsonDays(dir);
 const c = buildChronicle(chat, messages, goals);
-const outPath = flag("out") || path.join("reports", `编年史-${path.basename(dir)}.md`);
+// 默认文件名带群名，避免不同语料互相覆盖（通用性测试抓到的 bug）
+const safeChat = String(chat).replace(/[/\\:*?"<>|\s]/g, "-");
+const outPath = flag("out") || path.join("reports", `编年史-${safeChat}.md`);
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, renderChronicle(c));
 

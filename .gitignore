@@ -3,3 +3,4 @@ reports/*.md
 data/
 outbox/
 .mimosa/
+*.tgz
