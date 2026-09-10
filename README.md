@@ -31,6 +31,15 @@ cron 版等价配方（二选一）：
 
 约定：**只吃导出物，不碰生产库**——监管系统/`wx export` 把当天的会话导出丢进目录，V2 就地出日报。
 
+### V5 灌 Daily Doing + V6 群周刊（上游模板真格式）
+
+```bash
+node bin/daily-doing.mjs <源> --goals goals.qiyun.json   # V5：daily-routine 大纲稿 → outbox/（粘贴即确认）
+node bin/weekly.mjs <源> --end 2026-08-30 --goals goals.qiyun.json --feishu <folder-token>  # V6 群周刊
+```
+
+溯源：两命令的格式分别对齐上游 `Happy-logos/okr-doing-agent` v1.0.0 的 `templates/logseq/templates/daily-routine.md`（今天需要做 TODO / 今日行动记录 / 明天要做）与 `templates/logseq/templates/week-review.md`（周复盘 RREUA）。**V5 粘贴动作=人工确认门，本仓绝不写 Logseq 图谱；V6 只灌 Evidence 事实层，Result/Reason/Update/Action 留白给人**——记录与裁决分离，上游模板与本项目戒律同构。
+
 输入两种：微信「聊天记录」导出 txt（`[YYYY-MM-DD HH:MM] 说话人: 正文` + `↳ 回复` + 系统行），或按天 JSON 目录（气运+1 全量语料 `v2/raw/YYYY-MM-DD.json`，`{messages:[{content,sender,time,type}]}`，适配层见 `src/parse-days.mjs`）。
 
 ## 设计决定（都踩过真实数据的坑）
@@ -69,7 +78,7 @@ cron 版等价配方（二选一）：
 
 大群实测：59,006 → **51,100 条正本**（去重 896、空正文 7,010）。清洗产物 `data/` 不入库。
 
-## 测试电池（node --test，29 项）
+## 测试电池（node --test，33 项）
 
 - **冒烟**：CLI 端到端、exit 码、报告结构、跨日隔离。
 - **稳定性**：两次运行 SHA-256 字节一致；重复行去重；乱序后单日信号多重集不变。

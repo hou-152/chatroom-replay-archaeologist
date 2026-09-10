@@ -1,0 +1,4 @@
+{"chat":"周测群","messages":[
+ {"content":"上周方案搞定了","local_id":5,"sender":"张三","time":"2026-01-18 09:00","timestamp":30,"type":"文本"},
+ {"content":"帮我看看这个报错","local_id":6,"sender":"李四","time":"2026-01-18 10:00","timestamp":31,"type":"文本"}
+]}
