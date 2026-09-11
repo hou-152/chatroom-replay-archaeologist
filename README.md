@@ -1,10 +1,25 @@
-# 群聊回放考古官（V1）
+# 群聊回放考古官
 
-微信群聊转储 → 单日回放日报：把某一天群里发生的**承诺 / 公告 / 需求 / 风险 / 进展**挖出来，每条带消息出处，todo 直接可勾。图一乐项目「微信群聊 AGENT × OKR」的第一版（V1 回放考古官）。
+微信群聊导出 → 带出处的 todo/OKR 信号。五个视图共享一个确定性规则内核：**V1 单日回放日报 · V4 全量编年史 · V2 每日群秘书（可常驻推飞书）· V5 灌 Daily Doing · V6 周复盘周刊**。把某一天（或全部历史）群里发生的**承诺 / 公告 / 需求 / 风险 / 进展**挖出来，每条带消息出处，todo 直接可勾。
 
-内核是**确定性规则引擎**：同一输入恒定同输出，所有测试期望值独立手算，可 A/B 复核。
+内核是**确定性规则引擎**：同一输入恒定同输出，所有测试期望值独立手算，可 A/B 复核。零第三方依赖，node ≥ 18。
+
+[npm 包](https://www.npmjs.com/package/chatroom-replay-archaeologist) · [GitHub 仓库](https://github.com/hou-152/chatroom-replay-archaeologist)
 
 ## 用法
+
+### npm 安装（推荐）
+
+```bash
+npm install chatroom-replay-archaeologist        # 全局装亦可：npm i -g chatroom-replay-archaeologist
+npx chatroom-replay-archaeologist replay 群导出.txt --date 2026-08-30 --goals goals.example.json
+npx chatroom-replay-archaeologist chronicle ./json-days --goals goals.qiyun.json
+npx chatroom-replay-archaeologist weekly ./json-days --feishu <folder-token>
+```
+
+六个子命令：`replay`（单日回放）· `daily`（群秘书日报，默认最新一天，`--state` 可常驻）· `daily-doing`（daily-routine 大纲稿）· `weekly`（周复盘 RREUA 周刊）· `chronicle`（全量编年史）· `clean`（语料清洗正本）。
+
+### 仓库内直接跑（开发态）
 
 ```bash
 node bin/replay.mjs <群转储.txt> --list-days              # 看转储里有哪些天
@@ -13,7 +28,7 @@ node bin/replay.mjs <群转储.txt> --date 2026-08-30 \
 node bin/chronicle.mjs <按天JSON目录> --goals goals.example.json   # V4 全量编年史
 node bin/daily.mjs <txt转储 或 JSON目录> --goals goals.qiyun.json  # V2 群秘书日报（默认最新一天）
 #   加 --feishu <folder-token> 直接推飞书（lark-cli 通路，H1 即标题）
-node --test                                               # 四项电池
+node --test                                               # 测试电池
 ```
 
 V2 常驻化：**已装 launchd**（本机 `~/Library/LaunchAgents/ai.chatroom-secretary.daily.plist`，工作日 21:00 触发，`--state data/secretary-state.json` 记性——没有新的一天就静默收工，日志在 `data/secretary.log`）。数据源接监管系统时，改 plist 里的导出目录路径再 `launchctl bootstrap` 即可。卸载：
