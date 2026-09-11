@@ -48,7 +48,15 @@ export function loadJsonDays(dir) {
   const chatNames = new Set();
   const raws = [];
   for (const f of files) {
-    const j = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+    const filePath = path.join(dir, f);
+    let j;
+    try {
+      j = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    } catch {
+      continue; // 坏文件跳过
+    }
+    // 只吃「按天导出」文件：必须带 messages 数组（objects.json/raw.json 等管线文件跳过）
+    if (!Array.isArray(j.messages)) continue;
     if (j.chat) chatNames.add(j.chat);
     for (const m of j.messages) raws.push(m);
   }

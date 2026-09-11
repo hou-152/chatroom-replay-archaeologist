@@ -8,8 +8,24 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { loadJsonDays } from "../src/parse-days.mjs";
+
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const weekDir = path.join(root, "fixtures", "json-week");
+
+test("V-ENTP 前置：目录里混入非日 JSON（objects.json）时自动跳过不崩", () => {
+  const dir = path.join(os.tmpdir(), `json-mixed-${process.pid}`);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "objects.json"), JSON.stringify({ objects: [{ id: 1 }] }));
+  fs.writeFileSync(
+    path.join(dir, "2026-01-01.json"),
+    JSON.stringify({ chat: "混测群", messages: [{ content: "方案我明天之前给你", sender: "张三", time: "2026-01-01 09:00", timestamp: 1, type: "文本" }] })
+  );
+  const { chat, messages } = loadJsonDays(dir);
+  assert.equal(chat, "混测群");
+  assert.equal(messages.length, 1);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
 
 test("V6 周刊：RREUA 结构，机器只灌 Evidence，窗口手算核验", () => {
   const out = path.join(os.tmpdir(), `weekly-${process.pid}.md`);
