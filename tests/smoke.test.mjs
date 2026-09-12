@@ -9,6 +9,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { parseDump } from "../src/parse.mjs";
+import { loadSource } from "../src/source.mjs";
 import { replayDay } from "../src/replay.mjs";
 import { renderReport } from "../src/report.mjs";
 
@@ -25,6 +26,23 @@ test("解析：8 条消息全部为文本，无畸形无重复", () => {
   assert.equal(messages[0].speaker, "张三");
   assert.equal(messages[6].speaker, "钱七"); // 空正文也算文本消息
   assert.equal(messages[7].reply.to, "张三"); // ↳ 引用挂到孙八那条上
+});
+
+test("输入适配：txt 经统一入口保留群名、消息与解析统计", () => {
+  const parsed = parseDump(fs.readFileSync(fixture, "utf8"));
+  const loaded = loadSource(fixture);
+  assert.equal(loaded.chat, parsed.meta["聊天记录"]);
+  assert.deepEqual(loaded.messages, parsed.messages);
+  assert.equal(loaded.malformedCount, parsed.malformedCount);
+  assert.equal(loaded.droppedDuplicates, parsed.droppedDuplicates);
+});
+
+test("输入适配：按天 JSON 目录与既有适配层统计一致", () => {
+  const dir = path.join(root, "fixtures", "json-days");
+  const loaded = loadSource(dir);
+  assert.equal(loaded.chat, "测试群");
+  assert.equal(loaded.messages.length, 8);
+  assert.equal(loaded.droppedDuplicates, 0);
 });
 
 test("回放 09-01：承诺2强/需求1/风险1/进展1，出处与对齐正确", () => {

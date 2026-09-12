@@ -3,7 +3,7 @@
 // 退出码：0 成功 · 2 用法错误 · 3 文件不存在
 import fs from "node:fs";
 import path from "node:path";
-import { parseDump } from "../src/parse.mjs";
+import { loadSource } from "../src/source.mjs";
 import { replayDay, dayKeys } from "../src/replay.mjs";
 import { renderReport } from "../src/report.mjs";
 
@@ -24,9 +24,7 @@ if (!fs.existsSync(dumpArg)) {
   process.exit(3);
 }
 
-const text = fs.readFileSync(dumpArg, "utf8");
-const { meta, messages, malformedCount, droppedDuplicates } = parseDump(text);
-const chatId = meta["聊天记录"] || path.basename(dumpArg, path.extname(dumpArg));
+const { chat: chatId, messages, malformedCount, droppedDuplicates } = loadSource(dumpArg);
 
 if (hasFlag("list-days")) {
   for (const d of dayKeys(messages)) console.log(d);

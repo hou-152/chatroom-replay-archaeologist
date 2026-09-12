@@ -3,7 +3,7 @@
 // 退出码：0 成功 · 2 用法错误 · 3 目录不存在
 import fs from "node:fs";
 import path from "node:path";
-import { loadJsonDays } from "../src/parse-days.mjs";
+import { loadSource } from "../src/source.mjs";
 import { buildChronicle, renderChronicle } from "../src/chronicle.mjs";
 
 const args = process.argv.slice(2);
@@ -26,7 +26,7 @@ let goals = { objectives: [] };
 const goalsPath = flag("goals");
 if (goalsPath) goals = JSON.parse(fs.readFileSync(goalsPath, "utf8"));
 
-const { chat, messages, droppedDuplicates } = loadJsonDays(dir);
+const { chat, messages, droppedDuplicates } = loadSource(dir);
 const c = buildChronicle(chat, messages, goals);
 // 默认文件名带群名，避免不同语料互相覆盖（通用性测试抓到的 bug）
 const safeChat = String(chat).replace(/[/\\:*?"<>|\s]/g, "-");

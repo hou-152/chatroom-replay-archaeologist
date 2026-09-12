@@ -22,6 +22,20 @@ export function alignKr(signal, goals) {
   return hits.length === 0 ? null : hits.length === 1 ? hits[0] : `歧义（${hits.join("；")}）`;
 }
 
+// 给不同视图提供同一份“信号 + 消息出处 + KR 对齐”投影，避免各 CLI 各自拼装后产生漂移。
+export function detectMessageSignals(message, goals = { objectives: [] }) {
+  if (!message || message.kind !== "text") return [];
+  return detectSignals(message.body).map((signal) => ({
+    ...signal,
+    seq: message.seq,
+    date: message.date,
+    time: message.time,
+    speaker: message.speaker,
+    reply: message.reply,
+    alignedKr: alignKr(signal, goals),
+  }));
+}
+
 // @returns 单日回放结果（确定性：同输入恒同输出）
 export function replayDay(messages, date, goals = { objectives: [] }) {
   const dayText = [];
@@ -36,17 +50,7 @@ export function replayDay(messages, date, goals = { objectives: [] }) {
 
   const signals = [];
   for (const msg of dayText) {
-    for (const s of detectSignals(msg.body)) {
-      signals.push({
-        ...s,
-        seq: msg.seq,
-        date: msg.date,
-        time: msg.time,
-        speaker: msg.speaker,
-        reply: msg.reply,
-        alignedKr: alignKr(s, goals),
-      });
-    }
+    signals.push(...detectMessageSignals(msg, goals));
   }
   signals.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : a.seq - b.seq));
 

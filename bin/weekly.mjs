@@ -5,10 +5,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { parseDump } from "../src/parse.mjs";
-import { loadJsonDays } from "../src/parse-days.mjs";
-import { detectSignals } from "../src/signals.mjs";
-import { alignKr } from "../src/replay.mjs";
+import { loadSource } from "../src/source.mjs";
+import { detectMessageSignals } from "../src/replay.mjs";
 
 const args = process.argv.slice(2);
 const src = args.find((a) => !a.startsWith("--"));
@@ -26,14 +24,7 @@ if (!fs.existsSync(src)) {
   process.exit(3);
 }
 
-let chat, messages;
-if (fs.statSync(src).isDirectory()) {
-  ({ chat, messages } = loadJsonDays(src));
-} else {
-  const parsed = parseDump(fs.readFileSync(src, "utf8"));
-  chat = parsed.meta["聊天记录"] || path.basename(src, path.extname(src));
-  messages = parsed.messages;
-}
+const { chat, messages } = loadSource(src);
 
 const days = [...new Set(messages.filter((m) => m.date).map((m) => m.date))].sort();
 const end = flag("end") || days[days.length - 1];
@@ -72,13 +63,13 @@ for (const m of messages) {
   const b = byDay.get(m.date) || { messages: 0, signals: 0 };
   b.messages += 1;
   byDay.set(m.date, b);
-  for (const s of detectSignals(m.body)) {
-    const kr = alignKr(s, goals);
+  for (const s of detectMessageSignals(m, goals)) {
+    const kr = s.alignedKr;
     if (kr) krHits.set(kr, (krHits.get(kr) || 0) + 1);
     else if (s.type !== "公告") unaligned += 1;
     byType[s.type] += 1;
     b.signals += 1;
-    const full = { ...s, seq: m.seq, date: m.date, time: m.time, speaker: m.speaker, alignedKr: kr };
+    const full = s;
     if (s.type === "承诺") todos.push(full);
     if (s.type === "风险") risks.push(full);
     if (s.type === "进展") progress.push(full);

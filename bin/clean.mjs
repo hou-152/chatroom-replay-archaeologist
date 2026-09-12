@@ -4,8 +4,7 @@
 // 退出码：0 成功 · 2 用法错误 · 3 路径不存在
 import fs from "node:fs";
 import path from "node:path";
-import { parseDump } from "../src/parse.mjs";
-import { loadJsonDays } from "../src/parse-days.mjs";
+import { loadSource } from "../src/source.mjs";
 
 const args = process.argv.slice(2);
 const src = args.find((a) => !a.startsWith("--"));
@@ -23,15 +22,7 @@ if (!fs.existsSync(src)) {
   process.exit(3);
 }
 
-let chat, messages, droppedDuplicates = 0;
-if (fs.statSync(src).isDirectory()) {
-  ({ chat, messages, droppedDuplicates } = loadJsonDays(src));
-} else {
-  const parsed = parseDump(fs.readFileSync(src, "utf8"));
-  chat = parsed.meta["聊天记录"] || path.basename(src, path.extname(src));
-  messages = parsed.messages;
-  droppedDuplicates = parsed.droppedDuplicates;
-}
+const { chat, messages, droppedDuplicates = 0 } = loadSource(src);
 
 const outPath = flag("out") || path.join("data", `cleaned-${String(chat).replace(/[/\\:*?"<>|\s]/g, "-")}.jsonl`);
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

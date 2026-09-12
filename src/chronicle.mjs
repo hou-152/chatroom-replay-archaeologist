@@ -1,7 +1,6 @@
 // V4 语料时光机：全量消息 → 编年史（月度脉搏、KR 对齐总览、承诺全录、风险事件带）。
 // 确定性：同输入恒同输出；逐条信号带日期出处，可回放单日复核。
-import { detectSignals } from "./signals.mjs";
-import { alignKr } from "./replay.mjs";
+import { detectMessageSignals } from "./replay.mjs";
 
 const EMPTY_TYPES = { 承诺: 0, 公告: 0, 需求: 0, 风险: 0, 进展: 0 };
 
@@ -23,16 +22,8 @@ export function buildChronicle(chatName, messages, goals = { objectives: [] }) {
       continue;
     }
     bucket.messages += 1;
-    for (const s of detectSignals(m.body)) {
-      const full = {
-        ...s,
-        seq: m.seq,
-        date: m.date,
-        time: m.time,
-        speaker: m.speaker,
-        reply: m.reply,
-        alignedKr: alignKr(s, goals),
-      };
+    for (const s of detectMessageSignals(m, goals)) {
+      const full = s;
       bucket.byType[s.type] += 1;
       bucket.signals += 1;
       totals.byType[s.type] += 1;

@@ -12,8 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { parseDump } from "../src/parse.mjs";
-import { loadJsonDays } from "../src/parse-days.mjs";
+import { loadSource } from "../src/source.mjs";
 import { replayDay, dayKeys } from "../src/replay.mjs";
 
 const args = process.argv.slice(2);
@@ -52,14 +51,7 @@ if (apply) {
   }
 }
 
-let chat, messages;
-if (fs.statSync(src).isDirectory()) {
-  ({ chat, messages } = loadJsonDays(src));
-} else {
-  const parsed = parseDump(fs.readFileSync(src, "utf8"));
-  chat = parsed.meta["聊天记录"] || path.basename(src, path.extname(src));
-  messages = parsed.messages;
-}
+const { chat, messages } = loadSource(src);
 
 const days = dayKeys(messages);
 const date = flag("date") || days[days.length - 1];
