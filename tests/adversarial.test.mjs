@@ -12,6 +12,7 @@ import { parseDump } from "../src/parse.mjs";
 import { replayDay } from "../src/replay.mjs";
 import { renderReport } from "../src/report.mjs";
 import { detectSignals } from "../src/signals.mjs";
+import { alignKr } from "../src/replay.mjs";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -161,4 +162,16 @@ test("V1.1：第一人称门槛——群体催办不冒充个人承诺", () => {
 test("对抗：stripNoise 的 XML 剥离不会把正文一起吞掉", () => {
   const signals = detectSignals('嗯嗯好的 <?xml version="1.0"?><msg><title>x</title></msg> 方案我明天之前给你');
   assert.equal(signals.filter((s) => s.type === "承诺").length, 1);
+});
+
+test("V1.3：判断主体与否定范围，收件人不冒充承诺", () => {
+  assert.equal(detectSignals("有问题小窗我，今晚九点截止").some((s) => s.type === "承诺"), false);
+  assert.equal(detectSignals("我需要你明天之前交付方案").some((s) => s.type === "承诺"), false);
+  assert.equal(detectSignals("服务器没有报错").some((s) => s.type === "风险"), false);
+  assert.equal(detectSignals("我还没有完成方案").some((s) => s.type === "进展"), false);
+});
+
+test("V1.3：KR 对齐检索完整消息，并显式暴露多命中歧义", () => {
+  const [signal] = detectSignals("我明天之前交付一份很长的方案，末尾补充门店合同");
+  assert.match(alignKr(signal, { objectives: [{ o: "O", krs: [{ kr: "方案", keywords: ["方案"] }, { kr: "门店", keywords: ["门店"] }] }] }), /^歧义（/);
 });

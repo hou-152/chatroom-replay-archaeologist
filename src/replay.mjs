@@ -6,14 +6,20 @@ export function dayKeys(messages) {
 }
 
 export function alignKr(signal, goals) {
+  const text = signal.searchText || signal.quote || "";
+  const hits = [];
   for (const obj of (goals && goals.objectives) || []) {
     for (const kr of obj.krs || []) {
       for (const kw of kr.keywords || []) {
-        if (kw && signal.quote.includes(kw)) return `${obj.o} › ${kr.kr}`;
+        if (kw && text.includes(kw)) {
+          const label = `${obj.o} › ${kr.kr}`;
+          if (!hits.includes(label)) hits.push(label);
+          break;
+        }
       }
     }
   }
-  return null;
+  return hits.length === 0 ? null : hits.length === 1 ? hits[0] : `歧义（${hits.join("；")}）`;
 }
 
 // @returns 单日回放结果（确定性：同输入恒同输出）

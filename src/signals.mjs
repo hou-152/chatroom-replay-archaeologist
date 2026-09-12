@@ -26,6 +26,8 @@ const PROGRESS_RE = /(完成了|搞定了|搞好了|弄好了|上线了|发布�
 // 群体催办（"大家都别等到最后"）、播报截点里全是交付词和期限，但没有"我"。
 // 代价：无主语的口语承诺（"明天之前搞定"）会漏——宁可漏报，不可瞎报。
 const FIRST_PERSON_RE = /(我|咱|本人)/;
+const RECIPIENT_ONLY_RE = /(?:发给我|给我|交给我|回复我)/;
+const REQUESTING_OTHER_RE = /^(?:我)?(?:需要|想要|请|帮我)你/;
 
 export function stripNoise(body) {
   return body
@@ -48,22 +50,29 @@ export function detectSignals(rawBody) {
 
   const signals = [];
   const push = (type, extra = {}) =>
-    signals.push({ type, quote: mined.slice(0, QUOTE_MAX_CHARS), ...extra });
+    // quote 是可读证据（固定 60 字）；searchText 是内部判定材料，避免长消息后半段的 KR 被漏掉。
+    signals.push({ type, quote: mined.slice(0, QUOTE_MAX_CHARS), searchText: mined, ...extra });
 
   if (isAnnouncement(mined)) {
     push("公告");
     return signals; // 公告只留档，不参与承诺/需求挖掘
   }
 
-  if (RISK_RE.test(mined)) push("风险");
-  if (PROGRESS_RE.test(mined)) push("进展");
+  // 否定词只压住对应的判断，避免“没空开会，但风险已恢复”整条消息被吞掉。
+  const riskNegated = /(?:没有|没|未|不再|已不再)\s*(?:出问题|出事|挂|崩|故障|报错|延期|跳票|失效)/.test(mined);
+  const progressNegated = /(?:没有|没|未|还没|尚未)\s*(?:完成|搞定|搞好|弄好|上线|发布|交付|通过|恢复|修好)/.test(mined);
+  if (RISK_RE.test(mined) && !riskNegated) push("风险");
+  if (PROGRESS_RE.test(mined) && !progressNegated) push("进展");
 
   const negated = NEGATION_RE.test(mined);
   const dl = mined.match(DEADLINE_RE);
   const deadline = dl ? dl[0] : null;
   const volitional = VOLITION_RE.test(mined);
   const deliver = DELIVER_RE.test(mined);
-  if (!negated && FIRST_PERSON_RE.test(mined) && ((volitional && (deadline || deliver)) || (deadline && deliver))) {
+  // “有事发给我”里的“我”是收件人；“我需要你……”是派单，不把它记到说话人的承诺账。
+  const recipientOnly = RECIPIENT_ONLY_RE.test(mined) && !/(^|[，。；])\s*(我|咱|本人)(来|要|会|负责|准备|打算)/.test(mined);
+  const requestingOther = REQUESTING_OTHER_RE.test(mined);
+  if (!negated && !recipientOnly && !requestingOther && FIRST_PERSON_RE.test(mined) && ((volitional && (deadline || deliver)) || (deadline && deliver))) {
     push("承诺", { deadline, strength: deadline ? "强" : "弱" });
   }
 
