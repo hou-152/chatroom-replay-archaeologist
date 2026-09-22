@@ -40,6 +40,7 @@ export function adaptMessage(raw, seq) {
     kind: isSystem ? "system" : "text",
     body,
     reply,
+    ...(raw._source ? { source: raw._source } : {}),
   };
 }
 
@@ -58,7 +59,9 @@ export function loadJsonDays(dir) {
     // 只吃「按天导出」文件：必须带 messages 数组（objects.json/raw.json 等管线文件跳过）
     if (!Array.isArray(j.messages)) continue;
     if (j.chat) chatNames.add(j.chat);
-    for (const m of j.messages) raws.push(m);
+    for (const [index, m] of j.messages.entries()) {
+      raws.push({ ...m, _source: { file: f, index, chat: j.chat || path.basename(dir), localId: m.local_id ?? null, originalBody: String(m.content || "") } });
+    }
   }
   raws.sort((a, b) => (a.timestamp - b.timestamp) || ((a.local_id || 0) - (b.local_id || 0)));
   const seen = new Set();
@@ -67,7 +70,7 @@ export function loadJsonDays(dir) {
   for (let i = 0; i < raws.length; i++) {
     const m = adaptMessage(raws[i], i + 1);
     if (m.kind === "text") {
-      const key = `${m.date}|${m.time}|${m.speaker}|${m.body}`;
+      const key = JSON.stringify([m.source.chat, m.date, m.time, m.speaker, m.body, m.reply || null]);
       if (seen.has(key)) {
         droppedDuplicates += 1;
         continue;

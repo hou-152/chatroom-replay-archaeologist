@@ -76,6 +76,7 @@ export function parseDump(text) {
           malformed += 1;
         }
       }
+      cur.source = { line: i + 1 };
       messages.push(cur);
       continue;
     }
@@ -102,7 +103,7 @@ export function parseDump(text) {
   const deduped = [];
   for (const msg of messages) {
     if (msg.kind === "text") {
-      const key = `${msg.date}|${msg.time}|${msg.speaker}|${msg.body}`;
+      const key = JSON.stringify([msg.date, msg.time, msg.speaker, msg.body, msg.reply || null]);
       if (seen.has(key)) {
         droppedDuplicates += 1;
         continue;

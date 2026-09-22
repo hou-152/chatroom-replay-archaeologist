@@ -17,6 +17,7 @@ const commands = {
   weekly: "weekly.mjs",
   chronicle: "chronicle.mjs",
   clean: "clean.mjs",
+  evidence: "evidence.mjs",
 };
 
 if (!command || command === "help" || !commands[command]) {
@@ -30,6 +31,7 @@ if (!command || command === "help" || !commands[command]) {
   weekly      周复盘 RREUA 周刊（机器只灌 Evidence）
   chronicle   全量编年史（月度脉搏/KR 对齐/承诺全录/风险带）
   clean       语料清洗 → 结构化 JSONL 正本
+  evidence    群聊候选证据 → 工作台 / OKR 可读取的 JSON
 
 示例:
   chatroom-replay-archaeologist replay 群导出.txt --date 2026-08-30 --goals goals.example.json

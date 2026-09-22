@@ -17,7 +17,17 @@ npx chatroom-replay-archaeologist chronicle ./json-days --goals goals.qiyun.json
 npx chatroom-replay-archaeologist weekly ./json-days --feishu <folder-token>
 ```
 
-六个子命令：`replay`（单日回放）· `daily`（群秘书日报，默认最新一天，`--state` 可常驻）· `daily-doing`（daily-routine 大纲稿）· `weekly`（周复盘 RREUA 周刊）· `chronicle`（全量编年史）· `clean`（语料清洗正本）。
+七个子命令：`replay`（单日回放）· `daily`（群秘书日报，默认最新一天，`--state` 可常驻）· `daily-doing`（daily-routine 大纲稿）· `weekly`（周复盘 RREUA 周刊）· `chronicle`（全量编年史）· `clean`（语料清洗正本）· `evidence`（工作台 / OKR 候选证据 JSON）。
+
+### 接入个人工作台与 OKR
+
+```bash
+node bin/cli.mjs evidence ./json-days --start 2026-01-12 --end 2026-01-18 --out outbox/chatroom-evidence.json
+```
+
+省略 `--out` 时输出 JSON 到 stdout。导出使用 `chatroom-evidence/v1`，每条候选保留稳定 ID、实际日期、说话人、完整正文与原始文件位置。补录历史不会因序号变化重复生成已有候选；KR 关键词命中仅保留为建议。输出只写新文件，不覆盖语料或已有文件。
+
+个人工作台在候选区通过「导入群聊」预览并保留候选，之后沿用主线关联、审视和转行动。导出的 JSON 也可作为 `okr-review` 的 `--project-json` 输入；它提供复盘证据，不自动认领任务、设置完成状态或修改目标。
 
 ### 仓库内直接跑（开发态）
 
