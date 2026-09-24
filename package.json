@@ -1,6 +1,6 @@
 {
   "name": "chatroom-replay-archaeologist",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "群聊回放考古官：微信群聊导出 → 带出处的 todo/OKR 信号（回放日报 · 全量编年史 · 每日群秘书）。确定性规则内核，测试先行。",
   "license": "MIT",
   "type": "module",
